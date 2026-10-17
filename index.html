@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nūr y las letras</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff6dc;--ink:#1f2460;--card:#fff;--soft:#eadfbb;--glow:#ffc83d;--ok:#2fae8a;--bad:#e5586b;--btn:#1f2460;--btnink:#fff6dc;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141846;--ink:#fff3c9;--card:#222a7a;--soft:#3a44a6;--btn:#ffc83d;--btnink:#141846;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141846;--ink:#fff3c9;--card:#222a7a;--soft:#3a44a6;--btn:#ffc83d;--btnink:#141846;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Baloo 2",system-ui,sans-serif;font-size:1.15rem;line-height:1.35}
+#app{max-width:480px;margin:0 auto;padding:18px 16px 40px}
+h1{font-size:2rem;margin:0 0 4px}
+p{margin:0 0 12px}
+.ar{font-family:"Noto Naskh Arabic","Amiri",serif;direction:rtl;font-weight:700}
+.firefly{font-size:2.6rem;display:inline-block;animation:glow 2.4s ease-in-out infinite}
+@keyframes glow{50%{transform:translateY(-6px);filter:drop-shadow(0 0 10px var(--glow))}}
+@media (prefers-reduced-motion:reduce){.firefly{animation:none}}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+button:focus-visible{outline:4px solid var(--glow);outline-offset:2px}
+.lesson{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;text-align:left;background:var(--card);border-radius:22px;padding:14px 18px;margin-bottom:12px;box-shadow:0 3px 0 var(--soft)}
+.lesson .lt{font-family:"Noto Naskh Arabic",serif;font-size:1.9rem;direction:rtl;text-align:left;grid-column:1}
+.lesson .st{grid-row:1/3;grid-column:2;font-size:2rem;align-self:center}
+.big{background:var(--card);border-radius:28px;padding:12px 16px;text-align:center;margin-bottom:12px}
+.big .ar{font-size:7rem;line-height:1.3;display:block}
+.name{font-size:1.6rem;font-weight:700}
+.word{font-size:1.4rem}
+.row{display:flex;gap:10px;margin:10px 0}
+.btn{flex:1;background:var(--btn);color:var(--btnink);border-radius:18px;padding:12px 14px;font-weight:700;font-size:1.1rem}
+.btn.alt{background:var(--card);color:var(--ink);box-shadow:0 3px 0 var(--soft)}
+canvas{width:100%;height:auto;aspect-ratio:3/2;background:var(--card);border-radius:24px;border:3px dashed var(--soft);touch-action:none;display:block}
+.dots{display:flex;gap:6px;margin-bottom:12px}
+.dots i{flex:1;height:8px;border-radius:4px;background:var(--soft)}
+.dots i.on{background:var(--glow)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.opt{background:var(--card);border-radius:22px;padding:6px;font-family:"Noto Naskh Arabic",serif;font-size:4rem;line-height:1.5;box-shadow:0 3px 0 var(--soft)}
+.opt.ok{background:var(--ok);color:#fff}
+.opt.bad{background:var(--bad);color:#fff;animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.back{background:none;font-size:1rem;padding:6px 0;text-decoration:underline}
+.win{text-align:center;padding-top:30px}
+.win .bigstar{font-size:6rem}
+.note{font-size:.9rem;opacity:.75;margin-top:18px}
+.toast{display:none;position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--btn);color:var(--btnink);border-radius:16px;padding:12px 16px;font-size:1rem;z-index:5}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="msg" class="toast" role="status"></div>
+<script>
+const L=[
+ [["ا","Alif","ألف","Una rayita recta. Alarga el sonido «a».","أسد","león","🦁"],["ب","Bā","باء","Como la «b» de barco. Un punto abajo.","بيت","casa","🏠"],["ت","Tā","تاء","Como la «t» de taza. Dos puntos arriba.","تفاحة","manzana","🍎"],["ث","Thā","ثاء","Como la «z» de zapato (España). Tres puntos arriba.","ثعلب","zorro","🦊"]],
+ [["ن","Nūn","نون","Como la «n» de nube. Un punto arriba.","نجمة","estrella","⭐"],["ي","Yā","ياء","Como la «y» de yate. Dos puntos abajo.","يد","mano","✋"],["ج","Jīm","جيم","Como la «j» inglesa de jam. Un punto dentro.","جمل","camello","🐪"],["ح","Ḥā","حاء","Un soplido fuerte desde la garganta. Sin punto.","حصان","caballo","🐴"]],
+ [["خ","Khā","خاء","Como la «j» de jamón. Un punto arriba.","خروف","cordero","🐑"],["د","Dāl","دال","Como la «d» de dedo. Una curva.","دب","oso","🐻"],["ذ","Dhāl","ذال","La «d» suave de nada, con la lengua entre los dientes. Un punto.","ذرة","maíz","🌽"],["ر","Rā","راء","Como la «r» de pero. La lengua vibra una vez.","رمان","granada","🔴"]],
+ [["ز","Zāy","زاي","Como el zumbido de una abeja. Un punto arriba.","زهرة","flor","🌸"],["س","Sīn","سين","Como la «s» de sol. Tres dientes.","سمكة","pez","🐟"],["ش","Shīn","شين","Como «¡shhh!» de silencio. Tres puntos arriba.","شمس","sol","☀️"],["ص","Ṣād","صاد","Una «s» fuerte y gruesa. Un óvalo.","صقر","halcón","🦅"]],
+ [["ض","Ḍād","ضاد","Una «d» fuerte y gruesa. Un punto arriba.","ضفدع","rana","🐸"],["ط","Ṭā","طاء","Una «t» fuerte y gruesa. Un palito arriba.","طبل","tambor","🥁"],["ظ","Ẓā","ظاء","Una «dh» fuerte y gruesa. Un punto.","ظرف","sobre","✉️"],["ع","ʿAyn","عين","Sonido desde el fondo de la garganta. Sin punto.","عين","ojo","👁️"]]
+].map(l=>l.map(a=>({c:a[0],n:a[1],s:a[2],t:a[3],w:a[4],wt:a[5],e:a[6]})));
+let S={};try{S=JSON.parse(localStorage.getItem("nur")||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem("nur",JSON.stringify(S))}catch(e){}};
+const app=document.getElementById("app");
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+function msg(m){const n=document.getElementById("msg");n.textContent=m;n.style.display="block";clearTimeout(msg.t);msg.t=setTimeout(()=>n.style.display="none",6000)}
+function say(t){try{const ss=speechSynthesis;ss.cancel();const u=new SpeechSynthesisUtterance(t);const vs=ss.getVoices();const v=vs.find(v=>/^ar/i.test(v.lang));if(v){u.voice=v;u.lang=v.lang}else{u.lang="ar-SA";msg("Este teléfono no tiene voz árabe. Instálala en Ajustes, Idioma, Voz.")}u.rate=.7;setTimeout(()=>ss.speak(u),80)}catch(e){msg("Este navegador no reproduce audio.")}}
+let li=0,step=0,qs=[],qi=0;
+
+function home(){
+ const n=Object.keys(S).length;
+ app.innerHTML=`<span class="firefly">✨</span><h1>Nūr y las letras</h1>
+ <p>¡Hola! Soy Nūr. Toca una lección para aprender letras. Llevas ${n} de 5 estrellas.</p>`+
+ L.map((l,i)=>`<button class="lesson" onclick="start(${i})"><span class="lt">${l.map(x=>x.c).join(" ")}</span><span>Lección ${i+1}</span><span class="st">${S[i]?"⭐":"☆"}</span></button>`).join("")+
+ `<p class="note">Prototipo. El audio usa la voz del teléfono; en la app final serán grabaciones de un maestro.</p>`;
+}
+function start(i){li=i;step=0;card()}
+function card(){
+ const l=L[li],x=l[step];
+ app.innerHTML=`<div class="top"><button class="back" onclick="home()">Inicio</button><span>Lección ${li+1}</span></div>
+ <div class="dots">${l.map((_,k)=>`<i class="${k<=step?"on":""}"></i>`).join("")}</div>
+ <div class="big"><span class="ar" lang="ar">${x.c}</span><div class="name">${x.n}</div><p>${x.t}</p>
+ <div class="word">${x.e} <span class="ar" lang="ar">${x.w}</span> · ${x.wt}</div></div>
+ <div class="row"><button class="btn" onclick="say('${x.s}')">🔊 Escuchar</button></div>
+ <p>Traza la letra con el dedo:</p><canvas id="cv" width="600" height="400"></canvas>
+ <div class="row"><button class="btn alt" onclick="trace('${x.c}')">Borrar</button><button class="btn" onclick="next()">${step<l.length-1?"Siguiente":"Jugar"}</button></div>`;
+ trace(x.c);say(x.s);
+}
+function trace(ch){
+ const cv=document.getElementById("cv"),g=cv.getContext("2d");
+ const ghost=()=>{g.clearRect(0,0,600,400);g.fillStyle=getComputedStyle(document.body).getPropertyValue("--soft");g.font='700 300px "Noto Naskh Arabic",serif';g.textAlign="center";g.textBaseline="middle";g.fillText(ch,300,210)};
+ ghost();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(ghost);
+ let d=false;const col=getComputedStyle(document.body).color;
+ const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*600/r.width,(e.clientY-r.top)*400/r.height]};
+ cv.onpointerdown=e=>{d=true;cv.setPointerCapture(e.pointerId);const[p,q]=pt(e);g.strokeStyle=col;g.lineWidth=16;g.lineCap=g.lineJoin="round";g.beginPath();g.moveTo(p,q)};
+ cv.onpointermove=e=>{if(!d)return;const[p,q]=pt(e);g.lineTo(p,q);g.stroke()};
+ cv.onpointerup=cv.onpointercancel=()=>{d=false};
+}
+function next(){const l=L[li];if(step<l.length-1){step++;card()}else{qs=shuf(l);qi=0;quiz()}}
+function quiz(){
+ const t=qs[qi];
+ app.innerHTML=`<div class="top"><button class="back" onclick="home()">Inicio</button><span>Juego ${qi+1} de ${qs.length}</span></div>
+ <div class="dots">${qs.map((_,k)=>`<i class="${k<=qi?"on":""}"></i>`).join("")}</div>
+ <div class="big"><p>Toca la letra</p><div class="name">${t.n}</div></div>
+ <div class="row"><button class="btn alt" onclick="say('${t.s}')">🔊 Escuchar</button></div>
+ <div class="opts">${shuf(L[li]).map(o=>`<button class="opt" lang="ar" data-c="${o.c}" onclick="pick(this)">${o.c}</button>`).join("")}</div>`;
+ say(t.s);
+}
+function pick(b){
+ if(b.dataset.c===qs[qi].c){b.classList.add("ok");document.querySelectorAll(".opt").forEach(o=>o.disabled=true);
+  setTimeout(()=>{qi++;qi<qs.length?quiz():win()},700)}
+ else{b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),400)}
+}
+function win(){
+ S[li]=1;save();
+ app.innerHTML=`<div class="win"><div class="bigstar">⭐</div><h1>¡Estrella ganada!</h1><p>Terminaste la lección ${li+1}. ¡Muy bien!</p>
+ <div class="row">${li<4?`<button class="btn" onclick="start(${li+1})">Lección ${li+2}</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`;
+}
+home();
+</script>
+</body>
+</html>
