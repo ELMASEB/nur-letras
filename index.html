@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Nūr y las letras</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#fff6dc;--ink:#1f2460;--card:#fff;--soft:#eadfbb;--glow:#ffc83d;--ok:#2fae8a;--bad:#e5586b;--btn:#1f2460;--btnink:#fff6dc;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -46,6 +46,8 @@ canvas{width:100%;height:auto;aspect-ratio:3/2;background:var(--card);border-rad
 .win{text-align:center;padding-top:30px}
 .win .bigstar{font-size:6rem}
 .note{font-size:.9rem;opacity:.75;margin-top:18px}
+.opt.lat{font-family:"Baloo 2",sans-serif;font-size:1.9rem;line-height:1.8;padding:14px 6px}
+.ay{display:block;width:100%;background:var(--card);border-radius:20px;padding:8px 16px;margin-bottom:10px;font-family:"Amiri Quran","Noto Naskh Arabic",serif;font-size:2.1rem;line-height:2.1;direction:rtl;text-align:right}.ay small{font-family:"Baloo 2",sans-serif;font-size:1rem;opacity:.7}.ay.on{background:var(--glow);color:#1f2460}
 .toast{display:none;position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--btn);color:var(--btnink);border-radius:16px;padding:12px 16px;font-size:1rem;z-index:5}
 </style>
 </head>
@@ -58,7 +60,9 @@ const L=[
  [["ن","Nūn","نون","Como la «n» de nube. Un punto arriba.","نجمة","estrella","⭐"],["ي","Yā","ياء","Como la «y» de yate. Dos puntos abajo.","يد","mano","✋"],["ج","Jīm","جيم","Como la «j» inglesa de jam. Un punto dentro.","جمل","camello","🐪"],["ح","Ḥā","حاء","Un soplido fuerte desde la garganta. Sin punto.","حصان","caballo","🐴"]],
  [["خ","Khā","خاء","Como la «j» de jamón. Un punto arriba.","خروف","cordero","🐑"],["د","Dāl","دال","Como la «d» de dedo. Una curva.","دب","oso","🐻"],["ذ","Dhāl","ذال","La «d» suave de nada, con la lengua entre los dientes. Un punto.","ذرة","maíz","🌽"],["ر","Rā","راء","Como la «r» de pero. La lengua vibra una vez.","رمان","granada","🔴"]],
  [["ز","Zāy","زاي","Como el zumbido de una abeja. Un punto arriba.","زهرة","flor","🌸"],["س","Sīn","سين","Como la «s» de sol. Tres dientes.","سمكة","pez","🐟"],["ش","Shīn","شين","Como «¡shhh!» de silencio. Tres puntos arriba.","شمس","sol","☀️"],["ص","Ṣād","صاد","Una «s» fuerte y gruesa. Un óvalo.","صقر","halcón","🦅"]],
- [["ض","Ḍād","ضاد","Una «d» fuerte y gruesa. Un punto arriba.","ضفدع","rana","🐸"],["ط","Ṭā","طاء","Una «t» fuerte y gruesa. Un palito arriba.","طبل","tambor","🥁"],["ظ","Ẓā","ظاء","Una «dh» fuerte y gruesa. Un punto.","ظرف","sobre","✉️"],["ع","ʿAyn","عين","Sonido desde el fondo de la garganta. Sin punto.","عين","ojo","👁️"]]
+ [["ض","Ḍād","ضاد","Una «d» fuerte y gruesa. Un punto arriba.","ضفدع","rana","🐸"],["ط","Ṭā","طاء","Una «t» fuerte y gruesa. Un palito arriba.","طبل","tambor","🥁"],["ظ","Ẓā","ظاء","Una «dh» fuerte y gruesa. Un punto.","ظرف","sobre","✉️"],["ع","ʿAyn","عين","Sonido desde el fondo de la garganta. Sin punto.","عين","ojo","👁️"]],
+ [["غ","Ghayn","غين","Como hacer gárgaras suavemente. Un punto arriba.","غيمة","nube","☁️"],["ف","Fā","فاء","Como la «f» de foca. Un punto arriba.","فيل","elefante","🐘"],["ق","Qāf","قاف","Una «k» desde el fondo de la garganta. Dos puntos arriba.","قمر","luna","🌙"],["ك","Kāf","كاف","Como la «k» de kilo. Una pequeña marca dentro.","كتاب","libro","📖"]],
+ [["ل","Lām","لام","Como la «l» de luna. Un palito alto.","ليمون","limón","🍋"],["م","Mīm","ميم","Como la «m» de mamá. Una bolita.","موز","banana","🍌"],["ه","Hā","هاء","Una «h» suave, como un soplo ligero.","هلال","luna creciente","☪️"],["و","Wāw","واو","Como la «w» de web. Una cabecita redonda.","وردة","rosa","🌹"]]
 ].map(l=>l.map(a=>({c:a[0],n:a[1],s:a[2],t:a[3],w:a[4],wt:a[5],e:a[6]})));
 let S={};try{S=JSON.parse(localStorage.getItem("nur")||"{}")}catch(e){}
 const save=()=>{try{localStorage.setItem("nur",JSON.stringify(S))}catch(e){}};
@@ -71,9 +75,9 @@ let li=0,step=0,qs=[],qi=0;
 function home(){
  const n=Object.keys(S).length;
  app.innerHTML=`<span class="firefly">✨</span><h1>Nūr y las letras</h1>
- <p>¡Hola! Soy Nūr. Toca una lección para aprender letras. Llevas ${n} de 5 estrellas.</p>`+
+ <p>¡Hola! Soy Nūr. Toca una lección para aprender letras. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
  L.map((l,i)=>`<button class="lesson" onclick="start(${i})"><span class="lt">${l.map(x=>x.c).join(" ")}</span><span>Lección ${i+1}</span><span class="st">${S[i]?"⭐":"☆"}</span></button>`).join("")+
- `<p class="note">Prototipo. El audio usa la voz del teléfono; en la app final serán grabaciones de un maestro.</p>`;
+ `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="quran()"><span class="lt" lang="ar">القرآن</span><span>Suras cortas con recitador</span><span class="st">📖</span></button><p class="note">El audio de las letras usa la voz del teléfono. El del Corán es de un recitador y necesita internet.</p>`;
 }
 function start(i){li=i;step=0;card()}
 function card(){
@@ -115,8 +119,45 @@ function pick(b){
 function win(){
  S[li]=1;save();
  app.innerHTML=`<div class="win"><div class="bigstar">⭐</div><h1>¡Estrella ganada!</h1><p>Terminaste la lección ${li+1}. ¡Muy bien!</p>
- <div class="row">${li<4?`<button class="btn" onclick="start(${li+1})">Lección ${li+2}</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`;
+ <div class="row">${li<L.length-1?`<button class="btn" onclick="start(${li+1})">Lección ${li+2}</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`;
 }
+const SU=[[1,"Al-Fātiḥa"],[108,"Al-Kawthar"],[103,"Al-ʿAṣr"],[110,"An-Naṣr"],[112,"Al-Ikhlāṣ"],[113,"Al-Falaq"],[114,"An-Nās"],[105,"Al-Fīl"],[106,"Quraysh"],[107,"Al-Māʿūn"]];
+let au=null,ay=[],sn=0,all=false;
+const p3=n=>String(n).padStart(3,"0");
+function quran(){stopQ();app.innerHTML=`<div class="top"><button class="back" onclick="home()">Inicio</button><span>Corán</span></div><h1 class="ar" lang="ar">القرآن</h1><p>Elige una sura. Escucha al recitador y repite.</p>`+SU.map((s,i)=>`<button class="lesson" onclick="sura(${i})"><span class="lt" style="direction:ltr;font-family:inherit">${s[1]}</span><span>Sura ${s[0]}</span><span class="st">▶</span></button>`).join("")}
+async function getSura(n){try{const c=localStorage.getItem("q"+n);if(c)return JSON.parse(c)}catch(e){}
+ const r=await fetch(`https://api.alquran.cloud/v1/surah/${n}/quran-uthmani`);const j=await r.json();const a=j.data.ayahs.map(x=>x.text);
+ if(n!=1&&a[0].replace(/[\u064B-\u065F\u0670]/g,"").startsWith("بسم الله"))a[0]=a[0].split(" ").slice(4).join(" ");
+ try{localStorage.setItem("q"+n,JSON.stringify(a))}catch(e){}return a}
+async function sura(i){stopQ();sn=i;const hd=`<div class="top"><button class="back" onclick="quran()">Suras</button><span>${SU[i][1]}</span></div>`;app.innerHTML=hd+"<p>Cargando…</p>";
+ try{ay=await getSura(SU[i][0])}catch(e){app.innerHTML=hd+"<p>No se pudo cargar el texto. Revisa tu internet.</p>";return}
+ app.innerHTML=hd+`<div class="row"><button class="btn" onclick="playAy(0,true)">▶ Escuchar todo</button><button class="btn alt" onclick="stopQ()">⏹ Parar</button></div>`+ay.map((t,k)=>`<button class="ay" id="ay${k}" lang="ar" onclick="playAy(${k})">${t} <small>${k+1}</small></button>`).join("")+`<p class="note">Toca un verso para oírlo. Recitador: Mishary Alafasy, vía Quran.com.</p>`}
+function playAy(k,chain){stopQ(true);all=!!chain;document.querySelectorAll(".ay").forEach((e,j)=>e.classList.toggle("on",j===k));
+ au=new Audio(`https://verses.quran.foundation/Alafasy/mp3/${p3(SU[sn][0])}${p3(k+1)}.mp3`);au.onended=()=>{if(all&&k<ay.length-1)playAy(k+1,true);else stopQ()};au.onerror=()=>msg("No se pudo cargar el audio. Revisa tu internet.");au.play().catch(()=>msg("Toca de nuevo para reproducir."))}
+function stopQ(keep){try{if(au){au.onended=au.onerror=null;au.pause();au=null}}catch(e){}all=false;if(!keep)document.querySelectorAll(".ay").forEach(e=>e.classList.remove("on"))}
+const R=[
+{t:"Fatḥa: la vocal «a»",s:"بَ",r:"La rayita encima de la letra se llama fatḥa. Suena «a». بَ = ba.",ex:[["بَ","ba"],["تَ","ta"],["ثَ","tha"],["نَ","na"],["مَ","ma"],["لَ","la"],["سَ","sa"],["كَ","ka"]]},
+{t:"Kasra: la vocal «i»",s:"بِ",r:"La rayita debajo de la letra se llama kasra. Suena «i». بِ = bi.",ex:[["بِ","bi"],["تِ","ti"],["نِ","ni"],["مِ","mi"],["لِ","li"],["سِ","si"],["كِ","ki"],["رِ","ri"]]},
+{t:"Ḍamma: la vocal «u»",s:"بُ",r:"El signo con forma de «w» pequeña encima se llama Ḍamma. Suena «u». بُ = bu.",ex:[["بُ","bu"],["تُ","tu"],["نُ","nu"],["مُ","mu"],["لُ","lu"],["سُ","su"],["كُ","ku"],["رُ","ru"]]},
+{t:"Leer palabras con vocales cortas",s:"كَتَبَ",r:"Une las sílabas de derecha a izquierda. كَ + تَ + بَ = kataba.",ex:[["كَتَبَ","kataba"],["ذَهَبَ","dhahaba"],["فَتَحَ","fataḥa"],["جَلَسَ","jalasa"],["شَرِبَ","shariba"],["سَمِعَ","samiʿa"]]},
+{t:"Vocales largas",s:"بَا",r:"Fatḥa + alif = «ā» larga. Kasra + yāʾ = «ī». Ḍamma + wāw = «ū». Se alargan dos tiempos.",ex:[["بَا","bā"],["بِي","bī"],["بُو","bū"],["تَا","tā"],["مِي","mī"],["لُو","lū"],["سَا","sā"],["كِي","kī"]]},
+{t:"Sukūn: sin vocal",s:"بْ",r:"El circulito encima se llama sukūn. La letra suena sola, sin vocal. مَنْ = man.",ex:[["مَنْ","man"],["قَدْ","qad"],["لَمْ","lam"],["هَلْ","hal"],["بَلْ","bal"],["كَمْ","kam"]]},
+{t:"Shadda: letra doble",s:"بَّ",r:"La shadda (una «w» pequeña) repite la letra dos veces. رَبَّ = rab-ba.",ex:[["رَبَّ","rabba"],["ثُمَّ","thumma"],["حَقَّ","ḥaqqa"],["عَدَّ","ʿadda"],["رَبِّ","rabbi"],["مَدَّ","madda"]]},
+{t:"Tanwīn: «an, in, un»",s:"ـٌ",r:"Dos signos iguales al final de una palabra agregan una «n»: ـً an, ـٍ in, ـٌ un.",ex:[["كِتَابٌ","kitābun"],["كِتَابًا","kitāban"],["كِتَابٍ","kitābin"],["بَيْتٌ","baytun"],["بَيْتًا","baytan"],["بَيْتٍ","baytin"]]}
+];
+let ri=0,rs=0,rq=[],rqi=0;
+const rtop=t=>`<div class="top"><button class="back" onclick="home()">Inicio</button><span>${t}</span></div>`;
+const rar=t=>`<span class="ar" lang="ar" style="font-size:4.6rem;line-height:1.8">${t}</span>`;
+function rstart(i){ri=i;rs=0;rcard()}
+function rcard(){const l=R[ri];
+ if(rs==0){app.innerHTML=rtop(l.t)+`<div class="big">${rar(l.s)}<p>${l.r}</p></div><div class="row"><button class="btn" onclick="rs=1;rcard()">Empezar</button></div>`;return}
+ const x=l.ex[rs-1];
+ app.innerHTML=rtop(l.t)+`<div class="dots">${l.ex.map((_,k)=>`<i class="${k<rs?"on":""}"></i>`).join("")}</div><div class="big">${rar(x[0])}<div class="name">${x[1]}</div></div><div class="row"><button class="btn alt" onclick="say('${x[0]}')">🔊 Escuchar</button><button class="btn" onclick="rnext()">${rs<l.ex.length?"Siguiente":"Jugar"}</button></div>`;say(x[0])}
+function rnext(){if(rs<R[ri].ex.length){rs++;rcard()}else{rq=shuf(R[ri].ex).slice(0,5);rqi=0;rquiz()}}
+function rquiz(){const t=rq[rqi];const o=shuf(shuf(R[ri].ex.filter(e=>e[1]!==t[1])).slice(0,3).concat([t]));
+ app.innerHTML=rtop("Juego "+(rqi+1)+" de "+rq.length)+`<div class="big">${rar(t[0])}<p>¿Cómo se lee?</p></div><div class="row"><button class="btn alt" onclick="say('${t[0]}')">🔊 Escuchar</button></div><div class="opts">${o.map(e=>`<button class="opt lat" data-c="${e[1]}" onclick="rpick(this)">${e[1]}</button>`).join("")}</div>`;say(t[0])}
+function rpick(b){if(b.dataset.c===rq[rqi][1]){b.classList.add("ok");document.querySelectorAll(".opt").forEach(o=>o.disabled=true);setTimeout(()=>{rqi++;rqi<rq.length?rquiz():rwin()},700)}else{b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),400)}}
+function rwin(){S["r"+ri]=1;save();app.innerHTML=`<div class="win"><div class="bigstar">⭐</div><h1>¡Estrella ganada!</h1><p>Terminaste: ${R[ri].t}.</p><div class="row">${ri<R.length-1?`<button class="btn" onclick="rstart(${ri+1})">Siguiente lección</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`}
 home();
 </script>
 </body>
