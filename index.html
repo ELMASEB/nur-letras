@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Nūr y las letras</title>
+<title>Babeng y las letras</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#fff6dc;--ink:#1f2460;--card:#fff;--soft:#eadfbb;--glow:#ffc83d;--ok:#2fae8a;--bad:#e5586b;--btn:#1f2460;--btnink:#fff6dc;
@@ -74,8 +74,8 @@ let li=0,step=0,qs=[],qi=0;
 
 function home(){
  const n=Object.keys(S).length;
- app.innerHTML=`<span class="firefly">✨</span><h1>Nūr y las letras</h1>
- <p>¡Hola! Soy Nūr. Toca una lección para aprender letras. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
+ app.innerHTML=`<span class="firefly">✨</span><h1>Babeng y las letras</h1>
+ <p>¡Hola! Soy Babeng. Toca una lección para aprender letras. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
  L.map((l,i)=>`<button class="lesson" onclick="start(${i})"><span class="lt">${l.map(x=>x.c).join(" ")}</span><span>Lección ${i+1}</span><span class="st">${S[i]?"⭐":"☆"}</span></button>`).join("")+
  `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="quran()"><span class="lt" lang="ar">القرآن</span><span>Suras cortas con recitador</span><span class="st">📖</span></button><p class="note">El audio de las letras usa la voz del teléfono. El del Corán es de un recitador y necesita internet.</p>`;
 }
@@ -129,11 +129,23 @@ async function getSura(n){try{const c=localStorage.getItem("q"+n);if(c)return JS
  const r=await fetch(`https://api.alquran.cloud/v1/surah/${n}/quran-uthmani`);const j=await r.json();const a=j.data.ayahs.map(x=>x.text);
  if(n!=1&&a[0].replace(/[\u064B-\u065F\u0670]/g,"").startsWith("بسم الله"))a[0]=a[0].split(" ").slice(4).join(" ");
  try{localStorage.setItem("q"+n,JSON.stringify(a))}catch(e){}return a}
+let AU=[],WE=null;
+async function wEd(){if(WE)return WE;try{WE=localStorage.getItem("wed")}catch(e){}if(WE)return WE;
+ const r=await fetch("https://api.quranhub.com/v1/edition?format=text");const j=await r.json();
+ const e=j.data.find(x=>/warsh/i.test(x.identifier+(x.narratorIdentifier||"")+(x.name||"")+(x.englishName||"")));
+ if(!e)throw 0;WE=e.identifier;try{localStorage.setItem("wed",WE)}catch(z){}return WE}
+async function getW(n){try{const c=localStorage.getItem("w"+n);if(c){const o=JSON.parse(c);AU=o.a;return o.t}}catch(e){}
+ const ed=await wEd();const rs=await Promise.all([fetch(`https://api.quranhub.com/v1/surah/${n}/${ed}`),fetch(`https://api.quranhub.com/v1/surah/${n}/ar.husary.warsh`)]);
+ const jt=await rs[0].json(),ja=await rs[1].json();const t=jt.data.ayahs.map(x=>x.text),a=ja.data.ayahs.map(x=>x.audio);
+ const nm=s=>s.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,"").replace(/\u0671/g,"\u0627");
+ if(n!=1&&nm(t[0]).startsWith("بسم الله"))t[0]=t[0].split(" ").slice(4).join(" ");
+ if(t.length!==a.length)msg("El texto y el audio tienen distinto número de versos. Revísalo con un maestro.");
+ AU=a;try{localStorage.setItem("w"+n,JSON.stringify({t,a}))}catch(e){}return t}
 async function sura(i){stopQ();sn=i;const hd=`<div class="top"><button class="back" onclick="quran()">Suras</button><span>${SU[i][1]}</span></div>`;app.innerHTML=hd+"<p>Cargando…</p>";
- try{ay=await getSura(SU[i][0])}catch(e){app.innerHTML=hd+"<p>No se pudo cargar el texto. Revisa tu internet.</p>";return}
- app.innerHTML=hd+`<div class="row"><button class="btn" onclick="playAy(0,true)">▶ Escuchar todo</button><button class="btn alt" onclick="stopQ()">⏹ Parar</button></div>`+ay.map((t,k)=>`<button class="ay" id="ay${k}" lang="ar" onclick="playAy(${k})">${t} <small>${k+1}</small></button>`).join("")+`<p class="note">Toca un verso para oírlo. Recitador: Mishary Alafasy, vía Quran.com.</p>`}
+ try{ay=await getW(SU[i][0])}catch(e){app.innerHTML=hd+"<p>No se pudo cargar el texto. Revisa tu internet.</p>";return}
+ app.innerHTML=hd+`<div class="row"><button class="btn" onclick="playAy(0,true)">▶ Escuchar todo</button><button class="btn alt" onclick="stopQ()">⏹ Parar</button></div>`+ay.map((t,k)=>`<button class="ay" id="ay${k}" lang="ar" onclick="playAy(${k})">${t} <small>${k+1}</small></button>`).join("")+`<p class="note">Toca un verso para oírlo. Riwaya Warsh. Recitador: Mahmoud Khalil Al-Husary (QuranHub). Texto en revisión.</p>`}
 function playAy(k,chain){stopQ(true);all=!!chain;document.querySelectorAll(".ay").forEach((e,j)=>e.classList.toggle("on",j===k));
- au=new Audio(`https://verses.quran.foundation/Alafasy/mp3/${p3(SU[sn][0])}${p3(k+1)}.mp3`);au.onended=()=>{if(all&&k<ay.length-1)playAy(k+1,true);else stopQ()};au.onerror=()=>msg("No se pudo cargar el audio. Revisa tu internet.");au.play().catch(()=>msg("Toca de nuevo para reproducir."))}
+ au=new Audio(AU[k]||"");au.onended=()=>{if(all&&k<ay.length-1)playAy(k+1,true);else stopQ()};au.onerror=()=>msg("No se pudo cargar el audio. Revisa tu internet.");au.play().catch(()=>msg("Toca de nuevo para reproducir."))}
 function stopQ(keep){try{if(au){au.onended=au.onerror=null;au.pause();au=null}}catch(e){}all=false;if(!keep)document.querySelectorAll(".ay").forEach(e=>e.classList.remove("on"))}
 const R=[
 {t:"Fatḥa: la vocal «a»",s:"بَ",r:"La rayita encima de la letra se llama fatḥa. Suena «a». بَ = ba.",ex:[["بَ","ba"],["تَ","ta"],["ثَ","tha"],["نَ","na"],["مَ","ma"],["لَ","la"],["سَ","sa"],["كَ","ka"]]},
