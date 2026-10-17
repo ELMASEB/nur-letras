@@ -75,9 +75,9 @@ let li=0,step=0,qs=[],qi=0;
 function home(){
  const n=Object.keys(S).length;
  app.innerHTML=`<span class="firefly">✨</span><h1>Babeng y las letras</h1>
- <p>¡Hola! Soy Babeng. Toca una lección para aprender letras. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
+ <p>¡Hola! Soy Safi. Toca una lección para aprender letras. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
  L.map((l,i)=>`<button class="lesson" onclick="start(${i})"><span class="lt">${l.map(x=>x.c).join(" ")}</span><span>Lección ${i+1}</span><span class="st">${S[i]?"⭐":"☆"}</span></button>`).join("")+
- `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="quran()"><span class="lt" lang="ar">القرآن</span><span>Suras cortas con recitador</span><span class="st">📖</span></button><p class="note">El audio de las letras usa la voz del teléfono. El del Corán es de un recitador y necesita internet.</p>`;
+ `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="rd(0)"><span class="lt" style="direction:ltr;font-family:inherit">Practica leer</span><span>3 textos cortos en árabe</span><span class="st">📝</span></button><button class="lesson" onclick="story(0)"><span class="lt" style="direction:ltr;font-family:inherit">Historia de Safi</span><span>8 textos cortos</span><span class="st">📚</span></button><p class="note">El audio usa la voz del teléfono. Puede fallar con algunos sonidos.</p>`;
 }
 function start(i){li=i;step=0;card()}
 function card(){
@@ -170,6 +170,23 @@ function rquiz(){const t=rq[rqi];const o=shuf(shuf(R[ri].ex.filter(e=>e[1]!==t[1
  app.innerHTML=rtop("Juego "+(rqi+1)+" de "+rq.length)+`<div class="big">${rar(t[0])}<p>¿Cómo se lee?</p></div><div class="row"><button class="btn alt" onclick="say('${t[0]}')">🔊 Escuchar</button></div><div class="opts">${o.map(e=>`<button class="opt lat" data-c="${e[1]}" onclick="rpick(this)">${e[1]}</button>`).join("")}</div>`;say(t[0])}
 function rpick(b){if(b.dataset.c===rq[rqi][1]){b.classList.add("ok");document.querySelectorAll(".opt").forEach(o=>o.disabled=true);setTimeout(()=>{rqi++;rqi<rq.length?rquiz():rwin()},700)}else{b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),400)}}
 function rwin(){S["r"+ri]=1;save();app.innerHTML=`<div class="win"><div class="bigstar">⭐</div><h1>¡Estrella ganada!</h1><p>Terminaste: ${R[ri].t}.</p><div class="row">${ri<R.length-1?`<button class="btn" onclick="rstart(${ri+1})">Siguiente lección</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`}
+const RD=[
+{a:["أَنَا وَلَدٌ صَغِيرٌ.","أُحِبُّ الْقِرَاءَةَ."],es:"Soy un niño pequeño. Me gusta leer."},
+{a:["هَذَا بَيْتٌ كَبِيرٌ.","فِي الْبَيْتِ بَابٌ وَنَافِذَةٌ."],es:"Esta es una casa grande. En la casa hay una puerta y una ventana."},
+{a:["الشَّمْسُ جَمِيلَةٌ.","الْقَمَرُ يَظْهَرُ فِي اللَّيْلِ."],es:"El sol es hermoso. La luna aparece de noche."}
+];
+function rd(i,show){const c=RD[i];app.innerHTML=rtop("Practica leer")+`<div class="dots">${RD.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div><div class="big"><p>Lee en voz alta, de derecha a izquierda.</p><div class="ar" lang="ar" style="font-size:2.4rem;line-height:2.3">${c.a.join("<br>")}</div></div><div class="row"><button class="btn alt" onclick="rd(${i},${!show})">${show?"Ocultar traducción":"Ver traducción"}</button></div>${show?`<p class="note" style="font-size:1.1rem;opacity:1">${c.es}</p>`:""}<div class="row">${i>0?`<button class="btn alt" onclick="rd(${i-1})">Anterior</button>`:""}${i<RD.length-1?`<button class="btn" onclick="rd(${i+1})">Siguiente</button>`:`<button class="btn" onclick="story(0)">Ir a la historia</button>`}</div>`}
+const ST=[
+{e:"🌙",t:"Una luciérnaga curiosa",x:"Safi es una pequeña luciérnaga que vive en un jardín. Cada noche ve a los niños leer bajo la luna. Y se pregunta: «¿Qué dicen esas letras tan bonitas?»",a:""},
+{e:"📖",t:"Un libro abierto",x:"Una noche, Safi encuentra un libro abierto. Las letras parecen dibujos que bailan. Ve una rayita recta y exclama: «¡Es Alif! Empieza como un palito.»",a:"ا"},
+{e:"🏠",t:"La primera palabra",x:"Después ve una letra con un punto abajo: es Bā. Junto a otras letras forma la palabra «bayt», que significa casa. Safi da vueltas de alegría.",a:"بيت"},
+{e:"👭",t:"Letras hermanas",x:"Safi descubre que algunas letras son hermanas. Tienen la misma forma, pero cambian los puntos: uno abajo, dos arriba, tres arriba. «¡Qué fácil!»",a:"ب ت ث"},
+{e:"🌙",t:"Un sonido difícil",x:"Hay letras que suenan desde la garganta. Safi se enfada y no le salen. La luna le dice: «Escucha mucho y repite despacio. Nadie aprende todo en un día.»",a:"ع ح"},
+{e:"✨",t:"Las vocales",x:"Las letras no suenan solas. Necesitan pequeños signos. Uno da el sonido «a», otro «i» y otro «u». Ahora Safi lee: ba, bi, bu.",a:"بَ بِ بُ"},
+{e:"🧩",t:"Una palabra completa",x:"Safi junta tres letras con sus vocales y lee: «kataba». Significa «escribió». ¡Su primera palabra entera!",a:"كَتَبَ"},
+{e:"🌟",t:"Lo que aprendió Safi",x:"Safi aprendió que todo se aprende poco a poco, con paciencia. Un poco cada día es suficiente. Y tú, ¿qué letra aprenderás hoy?",a:""}
+];
+function story(i){const c=ST[i];app.innerHTML=rtop("Historia de Safi")+`<div class="dots">${ST.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div><div class="big"><div style="font-size:4rem">${c.e}</div><div class="name">${c.t}</div><p>${c.x}</p>${c.a?`<div>${rar(c.a)}</div><button class="btn alt" style="width:100%" onclick="say(this.dataset.t)" data-t="${c.a}">🔊 Escuchar</button>`:""}</div><div class="row">${i>0?`<button class="btn alt" onclick="story(${i-1})">Anterior</button>`:""}${i<ST.length-1?`<button class="btn" onclick="story(${i+1})">Siguiente</button>`:`<button class="btn" onclick="home()">Ir a las lecciones</button>`}</div>`}
 home();
 </script>
 </body>
