@@ -119,7 +119,7 @@ function pick(b){
  else{b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),400)}
 }
 function win(){
- S[li]=1;save();track("leccion","Letras "+(li+1));
+ S[li]=1;save();track("leccion","Lección "+(li+1)+": "+L[li].map(x=>x.n).join(", "));
  app.innerHTML=`<div class="win"><div class="bigstar">⭐</div><h1>¡Estrella ganada!</h1><p>Terminaste la lección ${li+1}. ¡Muy bien!</p>
  <div class="row">${li<L.length-1?`<button class="btn" onclick="start(${li+1})">Lección ${li+2}</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`;
 }
