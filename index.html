@@ -73,11 +73,13 @@ function say(t){try{const ss=speechSynthesis;ss.cancel();const u=new SpeechSynth
 let li=0,step=0,qs=[],qi=0;
 
 function home(){
- const n=Object.keys(S).length;
+ if(!S.name){ask();return}
+ if(!window._c){window._c=1;track("conexion")}
+ const n=Object.keys(S).filter(k=>k!=="name").length;
  app.innerHTML=`<span class="firefly">✨</span><h1>Babeng y las letras</h1>
- <p>¡Hola! Soy Safi. Toca una lección para aprender letras. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
+ <p>${S.name?`¡Hola, ${esc(S.name)}! Me alegra mucho verte. Soy Babeng y vamos a aprender juntos.`:"¡Hola! Soy Babeng."} Toca una lección para empezar. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
  L.map((l,i)=>`<button class="lesson" onclick="start(${i})"><span class="lt">${l.map(x=>x.c).join(" ")}</span><span>Lección ${i+1}</span><span class="st">${S[i]?"⭐":"☆"}</span></button>`).join("")+
- `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="rd(0)"><span class="lt" style="direction:ltr;font-family:inherit">Practica leer</span><span>3 textos cortos en árabe</span><span class="st">📝</span></button><button class="lesson" onclick="story(0)"><span class="lt" style="direction:ltr;font-family:inherit">Historia de Safi</span><span>8 textos cortos</span><span class="st">📚</span></button><p class="note">El audio usa la voz del teléfono. Puede fallar con algunos sonidos.</p>`;
+ `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="rd(0)"><span class="lt" style="direction:ltr;font-family:inherit">Practica leer</span><span>3 textos cortos en árabe</span><span class="st">📝</span></button><button class="lesson" onclick="story(0)"><span class="lt" style="direction:ltr;font-family:inherit">Historia de Safi</span><span>8 textos cortos</span><span class="st">📚</span></button><p class="note">El audio usa la voz del teléfono. Puede fallar con algunos sonidos.</p><p class="note">Esta app guarda tu nombre, la hora en que entras y las lecciones que terminas. Tu maestro puede verlos.</p><button class="back" onclick="chName()">Cambiar nombre</button>`;
 }
 function start(i){li=i;step=0;card()}
 function card(){
@@ -117,7 +119,7 @@ function pick(b){
  else{b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),400)}
 }
 function win(){
- S[li]=1;save();
+ S[li]=1;save();track("leccion","Letras "+(li+1));
  app.innerHTML=`<div class="win"><div class="bigstar">⭐</div><h1>¡Estrella ganada!</h1><p>Terminaste la lección ${li+1}. ¡Muy bien!</p>
  <div class="row">${li<L.length-1?`<button class="btn" onclick="start(${li+1})">Lección ${li+2}</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`;
 }
@@ -169,7 +171,7 @@ function rnext(){if(rs<R[ri].ex.length){rs++;rcard()}else{rq=shuf(R[ri].ex).slic
 function rquiz(){const t=rq[rqi];const o=shuf(shuf(R[ri].ex.filter(e=>e[1]!==t[1])).slice(0,3).concat([t]));
  app.innerHTML=rtop("Juego "+(rqi+1)+" de "+rq.length)+`<div class="big">${rar(t[0])}<p>¿Cómo se lee?</p></div><div class="row"><button class="btn alt" onclick="say('${t[0]}')">🔊 Escuchar</button></div><div class="opts">${o.map(e=>`<button class="opt lat" data-c="${e[1]}" onclick="rpick(this)">${e[1]}</button>`).join("")}</div>`;say(t[0])}
 function rpick(b){if(b.dataset.c===rq[rqi][1]){b.classList.add("ok");document.querySelectorAll(".opt").forEach(o=>o.disabled=true);setTimeout(()=>{rqi++;rqi<rq.length?rquiz():rwin()},700)}else{b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),400)}}
-function rwin(){S["r"+ri]=1;save();app.innerHTML=`<div class="win"><div class="bigstar">⭐</div><h1>¡Estrella ganada!</h1><p>Terminaste: ${R[ri].t}.</p><div class="row">${ri<R.length-1?`<button class="btn" onclick="rstart(${ri+1})">Siguiente lección</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`}
+function rwin(){S["r"+ri]=1;save();track("leccion",R[ri].t);app.innerHTML=`<div class="win"><div class="bigstar">⭐</div><h1>¡Estrella ganada!</h1><p>Terminaste: ${R[ri].t}.</p><div class="row">${ri<R.length-1?`<button class="btn" onclick="rstart(${ri+1})">Siguiente lección</button>`:""}<button class="btn alt" onclick="home()">Inicio</button></div></div>`}
 const RD=[
 {a:["أَنَا وَلَدٌ صَغِيرٌ.","أُحِبُّ الْقِرَاءَةَ."],es:"Soy un niño pequeño. Me gusta leer."},
 {a:["هَذَا بَيْتٌ كَبِيرٌ.","فِي الْبَيْتِ بَابٌ وَنَافِذَةٌ."],es:"Esta es una casa grande. En la casa hay una puerta y una ventana."},
@@ -187,6 +189,18 @@ const ST=[
 {e:"🌟",t:"Lo que aprendió Safi",x:"Safi aprendió que todo se aprende poco a poco, con paciencia. Un poco cada día es suficiente. Y tú, ¿qué letra aprenderás hoy?",a:""}
 ];
 function story(i){const c=ST[i];app.innerHTML=rtop("Historia de Safi")+`<div class="dots">${ST.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div><div class="big"><div style="font-size:4rem">${c.e}</div><div class="name">${c.t}</div><p>${c.x}</p>${c.a?`<div>${rar(c.a)}</div><button class="btn alt" style="width:100%" onclick="say(this.dataset.t)" data-t="${c.a}">🔊 Escuchar</button>`:""}</div><div class="row">${i>0?`<button class="btn alt" onclick="story(${i-1})">Anterior</button>`:""}${i<ST.length-1?`<button class="btn" onclick="story(${i+1})">Siguiente</button>`:`<button class="btn" onclick="home()">Ir a las lecciones</button>`}</div>`}
+function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function ask(){app.innerHTML=`<div class="win"><span class="firefly">✨</span><h1>¡Hola! Soy Babeng</h1><p>¿Cómo te llamas?</p><p class="note" style="font-size:1rem;opacity:1;text-align:left">Aviso para padres y tutores: esta app guarda el nombre de pila, la hora de conexión y las lecciones terminadas. Las ve el maestro para seguir el progreso.</p><label style="display:flex;gap:10px;align-items:center;text-align:left;margin:10px 0;font-size:1rem"><input type="checkbox" id="ok" style="width:26px;height:26px;flex:none"> Un adulto responsable está de acuerdo.</label><input id="nm" maxlength="20" autocomplete="off" style="width:100%;font:inherit;font-size:1.4rem;padding:12px 16px;border-radius:18px;border:3px solid var(--soft);background:var(--card);color:var(--ink);text-align:center"><div class="row"><button class="btn" onclick="setName()">Empezar</button></div></div>`}
+function setName(){const v=document.getElementById("nm").value.trim();if(!v){msg("Escribe tu nombre.");return}
+if(!document.getElementById("ok").checked){msg("Pide a un adulto que marque la casilla.");return}S.name=v;save();track("registro");home()}
+function chName(){delete S.name;save();home()}
+const HOOK="https://script.google.com/macros/s/AKfycbxIo5d6f6uqL74pvCMEWb6YVEIwaz8qj8Ywy92pyIiukoFHCtJkqGutJZ6h-NINbeFrhQ/exec";
+function track(e,d){if(!HOOK||!S.name)return;try{fetch(HOOK,{method:"POST",mode:"no-cors",body:JSON.stringify({n:S.name,e:e,d:d||""})})}catch(z){}}
+R.push(
+{t:"Hamza: el sonido ʾ",s:"أَ",r:"La hamza es una pausa corta en la garganta, como el corte al decir «¡ah!». Se escribe sobre alif (أ إ), sobre wāw (ؤ), sobre yāʾ (ئ) o sola (ء).",ex:[["أَ","ʾa"],["إِ","ʾi"],["أُ","ʾu"],["أَسَدٌ","ʾasadun"],["إِبِلٌ","ʾibilun"],["سُؤَالٌ","suʾālun"],["بِئْرٌ","biʾrun"],["مَاءٌ","māʾun"]]},
+{t:"ال: letras lunares",s:"الْقَمَرُ",r:"ال significa «el» o «la». Con las letras lunares, la lām se lee: al-. Lunares: ا ب ج ح خ ع غ ف ق ك م ه و ي.",ex:[["الْقَمَرُ","al-qamaru"],["الْبَيْتُ","al-baytu"],["الْكِتَابُ","al-kitābu"],["الْوَلَدُ","al-waladu"],["الْيَدُ","al-yadu"],["الْجَمَلُ","al-jamalu"],["الْفِيلُ","al-fīlu"],["الْمَسْجِدُ","al-masjidu"]]},
+{t:"ال: letras solares",s:"الشَّمْسُ",r:"Con las letras solares, la lām no se lee: se pronuncia la letra doble (shadda). Solares: ت ث د ذ ر ز س ش ص ض ط ظ ل ن.",ex:[["الشَّمْسُ","ash-shamsu"],["النُّورُ","an-nūru"],["الرَّجُلُ","ar-rajulu"],["السَّمَكُ","as-samaku"],["الدَّرْسُ","ad-darsu"],["التِّينُ","at-tīnu"],["الصَّبَاحُ","aṣ-ṣabāḥu"],["الزَّهْرَةُ","az-zahratu"]]}
+);
 home();
 </script>
 </body>
