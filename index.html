@@ -75,7 +75,7 @@ let li=0,step=0,qs=[],qi=0;
 function home(){
  if(!S.name||!S.u){ask();return}
  if(!window._c){window._c=1;track("conexion")}
- const n=Object.keys(S).filter(k=>k!=="name").length;
+ const n=Object.keys(S).filter(k=>/^r?\d+$/.test(k)).length;
  app.innerHTML=`<span class="firefly">✨</span><h1>Babeng y las letras</h1>
  <p>${S.name?`¡Hola, ${esc(S.name)}! Me alegra mucho verte. Soy Babeng y vamos a aprender juntos.`:"¡Hola! Soy Babeng."} Toca una lección para empezar. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
  L.map((l,i)=>`<button class="lesson" onclick="start(${i})"><span class="lt">${l.map(x=>x.c).join(" ")}</span><span>Lección ${i+1}</span><span class="st">${S[i]?"⭐":"☆"}</span></button>`).join("")+
@@ -208,12 +208,22 @@ async function login(){const u=document.getElementById("us").value.trim(),p=docu
  if(!document.getElementById("ok").checked){msg("Pide a un adulto que marque la casilla.");return}
  const b=document.getElementById("lb");b.disabled=true;
  try{const r=await fetch(HOOK,{method:"POST",body:JSON.stringify({a:"login",u:u,p:p})});const j=await r.json();
-  if(j.ok){S.u=u;S.p=p;S.name=j.n;save();track("acceso");home();return}
+  if(j.ok){S.u=u;S.p=p;S.name=j.n;S.v=Date.now();save();track("acceso");home();return}
   msg("Usuario o contraseña incorrectos.")}catch(e){msg("No se pudo conectar. Revisa tu internet.")}
  b.disabled=false}
 function chName(){delete S.name;delete S.u;delete S.p;save();home()}
 function track(e,d){if(!S.u)return;try{fetch(HOOK,{method:"POST",body:JSON.stringify({a:"ev",u:S.u,p:S.p,e:e,d:d||""})}).catch(()=>{})}catch(z){}}
-home();
+async function check(){
+ if(!S.u){home();return}
+ app.innerHTML=`<div class="win"><span class="firefly">✨</span><p>Comprobando acceso…</p></div>`;
+ try{const r=await fetch(HOOK,{method:"POST",body:JSON.stringify({a:"login",u:S.u,p:S.p})});const j=await r.json();
+  if(j.ok){S.name=j.n;S.v=Date.now();save();home();return}
+  chName();msg("Tu acceso ha caducado. Pide uno nuevo a tu maestro.")
+ }catch(e){
+  if(S.v&&Date.now()-S.v<3*864e5){home()}
+  else{app.innerHTML=`<div class="win"><p>No hay conexión. Conéctate a internet para entrar.</p><div class="row"><button class="btn" onclick="check()">Reintentar</button></div></div>`}
+ }}
+check();
 </script>
 </body>
 </html>
