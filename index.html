@@ -73,13 +73,13 @@ function say(t){try{const ss=speechSynthesis;ss.cancel();const u=new SpeechSynth
 let li=0,step=0,qs=[],qi=0;
 
 function home(){
- if(!S.name){ask();return}
+ if(!S.name||!S.u){ask();return}
  if(!window._c){window._c=1;track("conexion")}
  const n=Object.keys(S).filter(k=>k!=="name").length;
  app.innerHTML=`<span class="firefly">✨</span><h1>Babeng y las letras</h1>
  <p>${S.name?`¡Hola, ${esc(S.name)}! Me alegra mucho verte. Soy Babeng y vamos a aprender juntos.`:"¡Hola! Soy Babeng."} Toca una lección para empezar. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
  L.map((l,i)=>`<button class="lesson" onclick="start(${i})"><span class="lt">${l.map(x=>x.c).join(" ")}</span><span>Lección ${i+1}</span><span class="st">${S[i]?"⭐":"☆"}</span></button>`).join("")+
- `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="rd(0)"><span class="lt" style="direction:ltr;font-family:inherit">Practica leer</span><span>3 textos cortos en árabe</span><span class="st">📝</span></button><button class="lesson" onclick="story(0)"><span class="lt" style="direction:ltr;font-family:inherit">Historia de Safi</span><span>8 textos cortos</span><span class="st">📚</span></button><p class="note">El audio usa la voz del teléfono. Puede fallar con algunos sonidos.</p><p class="note">Esta app guarda tu nombre, la hora en que entras y las lecciones que terminas. Tu maestro puede verlos.</p><button class="back" onclick="chName()">Cambiar nombre</button>`;
+ `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="rd(0)"><span class="lt" style="direction:ltr;font-family:inherit">Practica leer</span><span>3 textos cortos en árabe</span><span class="st">📝</span></button><button class="lesson" onclick="story(0)"><span class="lt" style="direction:ltr;font-family:inherit">Historia de Safi</span><span>8 textos cortos</span><span class="st">📚</span></button><p class="note">El audio usa la voz del teléfono. Puede fallar con algunos sonidos.</p><p class="note">Esta app guarda tu nombre, la hora en que entras y las lecciones que terminas. Tu maestro puede verlos.</p><button class="back" onclick="chName()">Salir</button>`;
 }
 function start(i){li=i;step=0;card()}
 function card(){
@@ -201,6 +201,18 @@ R.push(
 {t:"ال: letras lunares",s:"الْقَمَرُ",r:"ال significa «el» o «la». Con las letras lunares, la lām se lee: al-. Lunares: ا ب ج ح خ ع غ ف ق ك م ه و ي.",ex:[["الْقَمَرُ","al-qamaru"],["الْبَيْتُ","al-baytu"],["الْكِتَابُ","al-kitābu"],["الْوَلَدُ","al-waladu"],["الْيَدُ","al-yadu"],["الْجَمَلُ","al-jamalu"],["الْفِيلُ","al-fīlu"],["الْمَسْجِدُ","al-masjidu"]]},
 {t:"ال: letras solares",s:"الشَّمْسُ",r:"Con las letras solares, la lām no se lee: se pronuncia la letra doble (shadda). Solares: ت ث د ذ ر ز س ش ص ض ط ظ ل ن.",ex:[["الشَّمْسُ","ash-shamsu"],["النُّورُ","an-nūru"],["الرَّجُلُ","ar-rajulu"],["السَّمَكُ","as-samaku"],["الدَّرْسُ","ad-darsu"],["التِّينُ","at-tīnu"],["الصَّبَاحُ","aṣ-ṣabāḥu"],["الزَّهْرَةُ","az-zahratu"]]}
 );
+const inp=(id,ph,t)=>`<input id="${id}" type="${t}" placeholder="${ph}" maxlength="30" autocomplete="off" autocapitalize="none" style="width:100%;font:inherit;font-size:1.3rem;padding:12px 16px;border-radius:18px;border:3px solid var(--soft);background:var(--card);color:var(--ink);text-align:center;margin-bottom:10px">`;
+function ask(){app.innerHTML=`<div class="win"><span class="firefly">✨</span><h1>¡Hola! Soy Babeng</h1><p>Escribe tu usuario y tu contraseña.</p>${inp("us","Usuario","text")}${inp("pw","Contraseña","password")}<p class="note" style="font-size:1rem;opacity:1;text-align:left">Aviso para padres y tutores: esta app guarda el nombre, la hora de conexión y las lecciones terminadas. Las ve el maestro para seguir el progreso.</p><label style="display:flex;gap:10px;align-items:center;text-align:left;margin:10px 0;font-size:1rem"><input type="checkbox" id="ok" style="width:26px;height:26px;flex:none"> Un adulto responsable está de acuerdo.</label><div class="row"><button class="btn" id="lb" onclick="login()">Entrar</button></div></div>`}
+async function login(){const u=document.getElementById("us").value.trim(),p=document.getElementById("pw").value;
+ if(!u||!p){msg("Escribe tu usuario y tu contraseña.");return}
+ if(!document.getElementById("ok").checked){msg("Pide a un adulto que marque la casilla.");return}
+ const b=document.getElementById("lb");b.disabled=true;
+ try{const r=await fetch(HOOK,{method:"POST",body:JSON.stringify({a:"login",u:u,p:p})});const j=await r.json();
+  if(j.ok){S.u=u;S.p=p;S.name=j.n;save();track("acceso");home();return}
+  msg("Usuario o contraseña incorrectos.")}catch(e){msg("No se pudo conectar. Revisa tu internet.")}
+ b.disabled=false}
+function chName(){delete S.name;delete S.u;delete S.p;save();home()}
+function track(e,d){if(!S.u)return;try{fetch(HOOK,{method:"POST",body:JSON.stringify({a:"ev",u:S.u,p:S.p,e:e,d:d||""})}).catch(()=>{})}catch(z){}}
 home();
 </script>
 </body>
