@@ -79,7 +79,7 @@ function home(){
  app.innerHTML=`<span class="firefly">✨</span><h1>Babeng y las letras</h1>
  <p>${S.name?`¡Hola, ${esc(S.name)}! Me alegra mucho verte. Soy Babeng y vamos a aprender juntos.`:"¡Hola! Soy Babeng."} Toca una lección para empezar. Llevas ${n} de ${L.length+R.length} estrellas.</p>`+
  L.map((l,i)=>`<button class="lesson" onclick="start(${i})"><span class="lt">${l.map(x=>x.c).join(" ")}</span><span>Lección ${i+1}</span><span class="st">${S[i]?"⭐":"☆"}</span></button>`).join("")+
- `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="rd(0)"><span class="lt" style="direction:ltr;font-family:inherit">Practica leer</span><span>3 textos cortos en árabe</span><span class="st">📝</span></button><button class="lesson" onclick="story(0)"><span class="lt" style="direction:ltr;font-family:inherit">Historia de Safi</span><span>8 textos cortos</span><span class="st">📚</span></button><p class="note">El audio usa la voz del teléfono. Puede fallar con algunos sonidos.</p><p class="note">Esta app guarda tu nombre, la hora en que entras y las lecciones que terminas. Tu maestro puede verlos.</p><button class="back" onclick="chName()">Salir</button>`;
+ `${R.map((l,i)=>`<button class="lesson" onclick="rstart(${i})"><span class="lt" lang="ar">${l.s}</span><span>${l.t}</span><span class="st">${S["r"+i]?"⭐":"☆"}</span></button>`).join("")}<button class="lesson" onclick="rd(0)"><span class="lt" style="direction:ltr;font-family:inherit">Practica leer</span><span>Textos cortos en árabe</span><span class="st">📝</span></button><button class="lesson" onclick="story(0)"><span class="lt" style="direction:ltr;font-family:inherit">Historia de Safi</span><span>8 textos cortos</span><span class="st">📚</span></button><p class="note">El audio usa la voz del teléfono. Puede fallar con algunos sonidos.</p><p class="note">Esta app guarda tu nombre, la hora en que entras y las lecciones que terminas. Tu maestro puede verlos.</p><button class="back" onclick="chName()">Salir</button>`;
 }
 function start(i){li=i;step=0;card()}
 function card(){
@@ -223,6 +223,12 @@ async function check(){
   if(S.v&&Date.now()-S.v<3*864e5){home()}
   else{app.innerHTML=`<div class="win"><p>No hay conexión. Conéctate a internet para entrar.</p><div class="row"><button class="btn" onclick="check()">Reintentar</button></div></div>`}
  }}
+R.push({t:"ة y ه: dos letras distintas",s:"مَدْرَسَةٌ",r:"ة (tāʾ marbūta) solo va al final de la palabra y se reconoce por sus dos puntos. Con vocal suena «t»: مَدْرَسَةٌ madrasatun. Al parar, suena «a». ه (hāʾ) va en cualquier lugar y siempre suena «h»: هَلْ hal.",ex:[["مَدْرَسَةٌ","madrasatun"],["شَجَرَةٌ","shajaratun"],["زَهْرَةٌ","zahratun"],["هَدِيَّةٌ","hadiyyatun"],["هَلْ","hal"],["هُوَ","huwa"],["وَجْهٌ","wajhun"],["سَيَّارَةٌ","sayyāratun"]]});
+RD.push(
+{a:["ذَهَبَ أَحْمَدُ إِلَى الْمَدْرَسَةِ صَبَاحًا.","وَجَلَسَ فِي الصَّفِّ بِجَانِبِ صَدِيقِهِ.","وَقَرَأَ الدَّرْسَ بِصَوْتٍ جَمِيلٍ."],es:"Ahmad fue a la escuela por la mañana. Y se sentó en la clase junto a su amigo. Y leyó la lección con una voz bonita."},
+{a:["فِي الْحَدِيقَةِ شَجَرَةٌ كَبِيرَةٌ وَزُهُورٌ جَمِيلَةٌ.","تَلْعَبُ الْبِنْتُ مَعَ أَخِيهَا تَحْتَ الشَّجَرَةِ.","وَتَقُولُ أُمُّهُمَا: الْحَمْدُ لِلَّهِ عَلَى هَذِهِ النِّعْمَةِ."],es:"En el jardín hay un árbol grande y flores bonitas. La niña juega con su hermano bajo el árbol. Y su madre dice: Alabado sea Dios por esta bendición."},
+{a:["قَالَ الْمُعَلِّمُ: مَنْ يَقْرَأُ الْآنَ؟","رَفَعَ سَعِيدٌ يَدَهُ وَقَرَأَ بِهُدُوءٍ.","فَابْتَسَمَ الْمُعَلِّمُ وَقَالَ: أَحْسَنْتَ يَا سَعِيدُ!"],es:"El maestro dijo: ¿Quién lee ahora? Saíd levantó la mano y leyó con calma. El maestro sonrió y dijo: ¡Muy bien, Saíd!"}
+);
 check();
 </script>
 </body>
